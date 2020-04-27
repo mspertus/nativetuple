@@ -127,11 +127,11 @@ log("foo {}, bar {}", {foo, bar}); // OK
 As another example, consider the following
 ```c++
 template<typename DataStruct, typename ...LocksProtectingDataStruct>
-void process(DataStruct ds, LocksProtectingDataStruct &...l)
+void process(DataStruct ds, <LocksProtectingDataStruct &>...l = {})
 {
   /* ... */
   // Once preparatory calculations are done, lock if necessary
-  scoped_lock sl(l...);
+  scoped_lock sl(l.[:]...);
   for(x : ds) {
     // Do stuff with x
   }
@@ -143,12 +143,11 @@ mutex m;
 void f()
 {
   // Shared data structure. process() should lock
-  process(sharedVec, m);
+  process(sharedVec, {m});
   // No concurrency. process() should not lock
   vector myVec = {2, 4, 6};
   process(myVec);
 }
- 
 ```
 More generally, a quick look at ACTCD19 shows almost 1000 uses of `std::tuple<>`, so not allowing the empty tuple type `<>` would prevent the use of native tuples for such code. 
 
